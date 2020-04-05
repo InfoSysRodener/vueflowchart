@@ -73,13 +73,14 @@ export default {
       maxZoom: 5,
       minZoom: 0.1,
       smoothScroll: true,
-      bounds: {
-        top: 0,
-        left: 0,
-        right: 1000,
-        bottom: 1000
-      },
-      boundsPadding: 0
+      bounds: true,
+      //   bounds: {
+      //     top: 0,
+      //     left: 0,
+      //     right: 1000,
+      //     bottom: 1000
+      //   },
+      boundsPadding: 0.1
     },
     action: {
       linking: false,
@@ -279,12 +280,13 @@ export default {
       this.scene.scale = panzoomInstance.getTransform().scale;
     },
     onPan(panzoomInstance) {
-      this.scene.centerX = panzoomInstance.getTransform().x;
-      this.scene.centerY = panzoomInstance.getTransform().y;
+      //   this.scene.centerX = panzoomInstance.getTransform().x;
+      //   this.scene.centerY = panzoomInstance.getTransform().y;
     },
+    // BUG: Not working currently. does not bound the box
     onPanEnd(panzoomInstance) {
-      this.scene.centerX = panzoomInstance.getTransform().x;
-      this.scene.centerY = panzoomInstance.getTransform().y;
+      //   this.scene.centerX = panzoomInstance.getTransform().x;
+      //   this.scene.centerY = panzoomInstance.getTransform().y;
     }
   },
   computed: {

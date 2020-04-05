@@ -2,6 +2,7 @@
   <div id="app">
     <!--<img alt="Vue logo" src="./assets/logo.png">-->
     <card :id="10"></card>
+    <!--  TODO: create new ID for every new node  -->
     <!-- <card v-for="(node, index) in scene.nodes" v-bind:key="index" :id="index"></card> -->
     <flowchart
       :scene.sync="scene"
@@ -31,6 +32,7 @@ export default {
         centerX: 0,
         centerY: 0,
         scale: 1,
+        // BUG: allow for empty array to load. Currently there is bug if nodes is empty
         nodes: [
           {
             id: 2,
@@ -54,8 +56,8 @@ export default {
             label: "test3"
           }
         ],
+        // BUG: unable to zoom in out if it's not loaded
         links: [
-          // BUG: unable to zoom in out if it's not loaded
           {
             id: 3,
             from: 2, // node id the link start
@@ -69,12 +71,10 @@ export default {
     };
   },
   methods: {
-    generateId() {
-      return Math.random();
-    },
     canvasClick(e) {
       console.log("canvas Click, event:", e);
     },
+    // TODO: when generate new node, create new ID for the Node. Generate a mongoId for every new node
     addNode() {
       let maxID = Math.max(
         0,
