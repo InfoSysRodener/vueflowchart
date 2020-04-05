@@ -81,6 +81,7 @@ export default {
   },
   methods: {
     handleMousedown(e) {
+      console.log("MOUSE DOWN");
       const target = e.target || e.srcElement;
       // console.log(target);
       if (
@@ -92,6 +93,7 @@ export default {
       e.preventDefault();
     },
     handleMouseOver() {
+      console.log("MOUSE OVER");
       this.show.delete = true;
     },
     handleMouseLeave() {

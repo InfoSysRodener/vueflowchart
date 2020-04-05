@@ -17,7 +17,7 @@
         class="g1"
         v-bind.sync="link"
         v-for="(link, index) in lines"
-        :key="`link${index}`"
+        :key="`${index}`"
         @deleteLink="linkDelete(link.id)"
         :options="nodeOptions"
       />
@@ -186,6 +186,7 @@ export default {
         e.pageY || e.clientY + document.documentElement.scrollTop;
     },
     handleMove(e) {
+      console.log("HANDLE MOVE CONTAINER");
       if (this.action.linking) {
         [this.mouse.x, this.mouse.y] = this.getMousePosition(this.$el, e);
         [this.draggingLink.mx, this.draggingLink.my] = [
@@ -241,6 +242,7 @@ export default {
       this.action.scrolling = false;
     },
     handleDown(e) {
+      console.log("HANDLE DOWN CONTAINER");
       const target = e.target || e.srcElement;
       // console.log('for scroll', target, e.keyCode, e.which)
       if (
@@ -354,5 +356,6 @@ export default {
 // }
 .nodes {
   z-index: 999;
+  position: absolute;
 }
 </style>
