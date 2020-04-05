@@ -1,39 +1,41 @@
 <template>
   <div
+    id="panzoom-element"
     class="flowchart-container"
+    ref="example_1"
     @mousemove="handleMove"
     @mouseup="handleUp"
     @mousedown="handleDown"
     @dragover.prevent
     @drop.prevent="drop"
   >
-    <panZoom @zoom="onZoom" @pan="onPan" selector=".g1" :options="panzoomOptions">
-      <svg width="100%" :height="`${height}px`">
-        <!--<g class="g1">-->
-        <!--<path d="M150 0 L75 200 L225 200 Z" />-->
-        <!--</g>-->
-        <flowchart_link
-          class="g1"
-          v-bind.sync="link"
-          v-for="(link, index) in lines"
-          :key="`link${index}`"
-          @deleteLink="linkDelete(link.id)"
-          :options="nodeOptions"
-        />
-        <!--<g class="g1">-->
-        <!--<path d="M150 0 L75 200 L225 200 Z" />-->
-        <!--</g>-->
-      </svg>
-      <flowchart_node
-        v-bind.sync="node"
-        v-for="(node, index) in scene.nodes"
-        :key="`node${index}`"
+    <svg width="100%" :height="`${height}px`">
+      <!--<g class="g1">-->
+      <!--<path d="M150 0 L75 200 L225 200 Z" />-->
+      <!--</g>-->
+      <flowchart_link
+        class="g1"
+        v-bind.sync="link"
+        v-for="(link, index) in lines"
+        :key="`link${index}`"
+        @deleteLink="linkDelete(link.id)"
         :options="nodeOptions"
-        @linkingStart="linkingStart(node.id)"
-        @linkingStop="linkingStop(node.id)"
-        @nodeSelected="nodeSelected(node.id, $event)"
-      ></flowchart_node>
-    </panZoom>
+      />
+      <!--<g class="g1">-->
+      <!--<path d="M150 0 L75 200 L225 200 Z" />-->
+      <!--</g>-->
+    </svg>
+    <flowchart_node
+      v-bind.sync="node"
+      v-for="(node, index) in scene.nodes"
+      :key="`node${index}`"
+      :options="nodeOptions"
+      @linkingStart="linkingStart(node.id)"
+      @linkingStop="linkingStop(node.id)"
+      @nodeSelected="nodeSelected(node.id, $event)"
+      @click="console.log('clicking')"
+      class="nodes"
+    ></flowchart_node>
     <slot></slot>
   </div>
 </template>
@@ -43,6 +45,7 @@
 import { flowchatMixins } from "../../mixins";
 import flowchart_link from "./link.vue";
 import flowchart_node from "./node.vue";
+const Panzoom = require("../../dist/panzoom.js");
 export default {
   mixins: [flowchatMixins],
   name: "container",
@@ -69,19 +72,6 @@ export default {
     }
   },
   data: () => ({
-    panzoomOptions: {
-      maxZoom: 5,
-      minZoom: 0.1,
-      smoothScroll: true,
-      bounds: true,
-      //   bounds: {
-      //     top: 0,
-      //     left: 0,
-      //     right: 1000,
-      //     bottom: 1000
-      //   },
-      boundsPadding: 0.1
-    },
     action: {
       linking: false,
       dragging: false,
@@ -100,6 +90,22 @@ export default {
       left: 0
     }
   }),
+  mounted() {
+    var $flowchart = this.$refs["example_1"];
+    var parent = $flowchart.parentElement;
+    const panzoom = Panzoom($flowchart, {
+      startScale: 1,
+      maxScale: 5,
+      startX: 0,
+      startY: 0,
+      contain: "outside"
+    });
+    parent.addEventListener("wheel", panzoom.zoomWithWheel);
+    $flowchart.addEventListener("panzoomzoom", e => {
+      console.log("ZOOMING", panzoom.getScale());
+      //   $flowchart.flowchart('setPositionRatio', panzoom.getScale())
+    });
+  },
   methods: {
     drop(e) {
       console.log("dragDrop", e);
@@ -273,20 +279,6 @@ export default {
         return link.from !== id && link.to !== id;
       });
       this.$emit("nodeDelete", id);
-    },
-    onZoom(panzoomInstance) {
-      console.log("================ SCALING ===================");
-      console.log(panzoomInstance.getTransform());
-      this.scene.scale = panzoomInstance.getTransform().scale;
-    },
-    onPan(panzoomInstance) {
-      //   this.scene.centerX = panzoomInstance.getTransform().x;
-      //   this.scene.centerY = panzoomInstance.getTransform().y;
-    },
-    // BUG: Not working currently. does not bound the box
-    onPanEnd(panzoomInstance) {
-      //   this.scene.centerX = panzoomInstance.getTransform().x;
-      //   this.scene.centerY = panzoomInstance.getTransform().y;
     }
   },
   computed: {
@@ -336,13 +328,31 @@ export default {
 </script>
 
 <style scoped lang="scss">
+#panzoom-element {
+  position: relative;
+  width: 3000px;
+  height: 3000px;
+}
 .flowchart-container {
-  margin: 0;
-  background: #ededed;
   position: relative;
   overflow: hidden;
+  height: 4000px;
+  width: 15000px;
+  border: 10px solid yellow;
   svg {
     cursor: grab;
   }
+}
+// .flowchart-container {
+//   margin: 0;
+//   background: #ededed;
+//   position: relative;
+//   overflow: hidden;
+//   svg {
+//     cursor: grab;
+//   }
+// }
+.nodes {
+  z-index: 999;
 }
 </style>

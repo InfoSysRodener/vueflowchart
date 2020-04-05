@@ -125,7 +125,7 @@ $portSize: 12;
   box-sizing: border-box;
   border: none;
   background: white;
-  z-index: 1;
+  z-index: 999;
   opacity: 0.9;
   cursor: move;
   transform-origin: top left;

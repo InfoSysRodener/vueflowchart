@@ -4,15 +4,17 @@
     <card :id="10"></card>
     <!--  TODO: create new ID for every new node  -->
     <!-- <card v-for="(node, index) in scene.nodes" v-bind:key="index" :id="index"></card> -->
-    <flowchart
-      :scene.sync="scene"
-      @nodeClick="nodeClick"
-      @nodeDelete="nodeDelete"
-      @linkBreak="linkBreak"
-      @linkAdded="linkAdded"
-      @canvasClick="canvasClick"
-      :height="600"
-    ></flowchart>
+    <div class="panzoom-parent">
+      <flowchart
+        :scene.sync="scene"
+        @nodeClick="nodeClick"
+        @nodeDelete="nodeDelete"
+        @linkBreak="linkBreak"
+        @linkAdded="linkAdded"
+        @canvasClick="canvasClick"
+        :height="600"
+      ></flowchart>
+    </div>
   </div>
 </template>
 
@@ -114,5 +116,11 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+.panzoom-parent {
+  position: relative;
+  border: 3px solid red;
+  height: 1000px;
+  width: 1000px;
 }
 </style>
