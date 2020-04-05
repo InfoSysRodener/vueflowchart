@@ -98,7 +98,8 @@ export default {
       maxScale: 5,
       startX: 0,
       startY: 0,
-      contain: "outside"
+      contain: "outside", 
+      excludeClass: "nodes"
     });
     parent.addEventListener("wheel", panzoom.zoomWithWheel);
     $flowchart.addEventListener("panzoomzoom", e => {
