@@ -2,7 +2,7 @@
   <div
     id="panzoom-element"
     class="flowchart-container"
-    ref="example_1"
+    ref="flowchart_container"
     @mousemove="handleMove"
     @mouseup="handleUp"
     @mousedown="handleDown"
@@ -67,10 +67,6 @@ export default {
   },
   data: () => ({
     flowchart_scale:1,
-    flowchart_dragging_link:{
-        mx: 0,
-        my: 0
-    },
     action: {
       linking: false,
       dragging: false,
@@ -84,15 +80,14 @@ export default {
       lastY: 0
     },
     draggingLink: null,
-
     rootDivOffset: {
       top: 0,
       left: 0
     }
   }),
   mounted() {
-    var $flowchart = this.$refs["example_1"];
-    var parent = $flowchart.parentElement;
+    let $flowchart = this.$refs["flowchart_container"];
+    let parent = $flowchart.parentElement;
     const panzoom = Panzoom($flowchart, {
       startScale: 1,
       maxScale: 5,
@@ -103,18 +98,11 @@ export default {
     });
     parent.addEventListener("wheel", panzoom.zoomWithWheel);
     $flowchart.addEventListener("panzoomzoom", e => {
-      console.log("ZOOMING", panzoom.getScale());
       this.flowchart_scale = panzoom.getScale();
-    });
-    $flowchart.addEventListener("mousemove",e => {
-        let [ mouseX, mouseY ]  = this.getMousePosition($flowchart, e);
-        this.flowchart_dragging_link.mx = mouseX / this.flowchart_scale;
-        this.flowchart_dragging_link.my = mouseY / this.flowchart_scale;
     });
   },
   methods: {
     drop(e) {
-      console.log("dragDrop", e);
       const card_id = e.dataTransfer.getData("card_id");
       const title = e.dataTransfer.getData("title");
       this.scene.nodes.push({
@@ -153,12 +141,9 @@ export default {
           return link.from === this.draggingLink.from && link.to === index;
         });
         if (!existed) {
-          let maxID = Math.max(
-            0,
-            ...this.scene.links.map(link => {
+          let maxID = Math.max(0, ...this.scene.links.map(link => {
               return link.id;
-            })
-          );
+            }));
           const newLink = {
             id: maxID + 1,
             from: this.draggingLink.from,
@@ -186,36 +171,35 @@ export default {
       this.action.dragging = id;
       this.action.selected = id;
       this.$emit("nodeClick", id);
-      this.mouse.lastX =
-        e.pageX || e.clientX + document.documentElement.scrollLeft;
-      this.mouse.lastY =
-        e.pageY || e.clientY + document.documentElement.scrollTop;
+      this.mouse.lastX = e.pageX || e.clientX + document.documentElement.scrollLeft;
+      this.mouse.lastY = e.pageY || e.clientY + document.documentElement.scrollTop;
     },
     handleMove(e) {
       // console.log("HANDLE MOVE CONTAINER",e);
       if (this.action.linking) {
-        [this.mouse.x, this.mouse.y] = this.getMousePosition(this.$el, e);
+        [this.mouse.x, this.mouse.y] = this.getMousePosition(this.$refs["flowchart_container"], e);
 
-        // //dragging link
-        // [this.draggingLink.mx, this.draggingLink.my] = [
-        //   this.mouse.x,
-        //   this.mouse.y
-        // ];
+        //dragging link
+        [this.draggingLink.mx, this.draggingLink.my] = [
+          this.mouse.x / this.flowchart_scale,
+          this.mouse.y / this.flowchart_scale
+        ];
       }
       if (this.action.dragging) {
-        this.mouse.x =
-          e.pageX || e.clientX + document.documentElement.scrollLeft;
-        this.mouse.y =
-          e.pageY || e.clientY + document.documentElement.scrollTop;
+
+        this.mouse.x = e.pageX || e.clientX + document.documentElement.scrollLeft;
+        this.mouse.y = e.pageY || e.clientY + document.documentElement.scrollTop;
+
         let diffX = this.mouse.x - this.mouse.lastX;
         let diffY = this.mouse.y - this.mouse.lastY;
 
         this.mouse.lastX = this.mouse.x;
         this.mouse.lastY = this.mouse.y;
+
         this.moveSelectedNode(diffX, diffY);
       }
       if (this.action.scrolling) {
-        [this.mouse.x, this.mouse.y] = this.getMousePosition(this.$el, e);
+        [this.mouse.x, this.mouse.y] = this.getMousePosition(this.$refs["flowchart_container"], e);
         let diffX = this.mouse.x - this.mouse.lastX;
         let diffY = this.mouse.y - this.mouse.lastY;
 
@@ -231,17 +215,10 @@ export default {
     handleUp(e) {
       const target = e.target || e.srcElement;
       if (this.$el.contains(target)) {
-        if (
-          typeof target.className !== "string" ||
-          target.className.indexOf("node-input") < 0
-        ) {
+        if (typeof target.className !== "string" || target.className.indexOf("node-input") < 0) {
           this.draggingLink = null;
         }
-        if (
-          typeof target.className === "string" &&
-          target.className.indexOf("node-delete") > -1
-        ) {
-          // console.log('delete2', this.action.dragging);
+        if (typeof target.className === "string" && target.className.indexOf("node-delete") > -1) {
           this.nodeDelete(this.action.dragging);
         }
       }
@@ -253,15 +230,9 @@ export default {
       console.log("HANDLE DOWN CONTAINER");
       const target = e.target || e.srcElement;
       // console.log('for scroll', target, e.keyCode, e.which)
-      if (
-        (target === this.$el || target.matches("svg, svg *")) &&
-        e.which === 1
-      ) {
+      if ((target === this.$el || target.matches("svg, svg *")) && e.which === 1) {
         this.action.scrolling = true;
-        [this.mouse.lastX, this.mouse.lastY] = this.getMousePosition(
-          this.$el,
-          e
-        );
+        [this.mouse.lastX, this.mouse.lastY] = this.getMousePosition(this.$refs["flowchart_container"], e);
         this.action.selected = null; // deselectAll
       }
       this.$emit("canvasClick", e);
@@ -270,8 +241,8 @@ export default {
       let index = this.scene.nodes.findIndex(item => {
         return item.id === this.action.dragging;
       });
-      let left = this.scene.nodes[index].x + dx / this.scene.scale;
-      let top = this.scene.nodes[index].y + dy / this.scene.scale;
+      let left = this.scene.nodes[index].x + dx / this.flowchart_scale;
+      let top = this.scene.nodes[index].y + dy / this.flowchart_scale;
       this.$set(
         this.scene.nodes,
         index,
@@ -329,7 +300,7 @@ export default {
 
         lines.push({
           start: [cx, cy],
-          end: [this.flowchart_dragging_link.mx,this.flowchart_dragging_link.my]
+          end: [this.draggingLink.mx,this.draggingLink.my]
         });
       }
       return lines;
