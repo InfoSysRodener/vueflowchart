@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <!--<img alt="Vue logo" src="./assets/logo.png">-->
-    <card :id="10"></card>
+    <card></card>
     <!--  TODO: create new ID for every new node  -->
     <!-- <card v-for="(node, index) in scene.nodes" v-bind:key="index" :id="index"></card> -->
     <div class="panzoom-parent">

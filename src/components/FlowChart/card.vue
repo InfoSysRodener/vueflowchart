@@ -33,9 +33,8 @@ export default {
   methods: {
     dragStart(e) {
       console.log("dragStart", e.target.id);
-      const target = e.target;
-      console.log(e.target);
-      e.dataTransfer.setData("card_id", target.id);
+      const card_id = Math.floor(Math.random() * 1000);
+      e.dataTransfer.setData("card_id", card_id);
       e.dataTransfer.setData("title", "start");
     },
     ondragend(e) {

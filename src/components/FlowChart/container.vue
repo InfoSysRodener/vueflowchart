@@ -10,20 +10,14 @@
     @drop.prevent="drop"
   >
     <svg width="100%" :height="`${height}px`">
-      <!--<g class="g1">-->
-      <!--<path d="M150 0 L75 200 L225 200 Z" />-->
-      <!--</g>-->
       <flowchart_link
-        class="g1"
+        class="nodes"
         v-bind.sync="link"
         v-for="(link, index) in lines"
         :key="`${index}`"
         @deleteLink="linkDelete(link.id)"
         :options="nodeOptions"
       />
-      <!--<g class="g1">-->
-      <!--<path d="M150 0 L75 200 L225 200 Z" />-->
-      <!--</g>-->
     </svg>
     <flowchart_node
       v-bind.sync="node"
@@ -72,6 +66,11 @@ export default {
     }
   },
   data: () => ({
+    flowchart_scale:1,
+    flowchart_dragging_link:{
+        mx: 0,
+        my: 0
+    },
     action: {
       linking: false,
       dragging: false,
@@ -85,6 +84,7 @@ export default {
       lastY: 0
     },
     draggingLink: null,
+
     rootDivOffset: {
       top: 0,
       left: 0
@@ -104,7 +104,12 @@ export default {
     parent.addEventListener("wheel", panzoom.zoomWithWheel);
     $flowchart.addEventListener("panzoomzoom", e => {
       console.log("ZOOMING", panzoom.getScale());
-      //   $flowchart.flowchart('setPositionRatio', panzoom.getScale())
+      this.flowchart_scale = panzoom.getScale();
+    });
+    $flowchart.addEventListener("mousemove",e => {
+        let [ mouseX, mouseY ]  = this.getMousePosition($flowchart, e);
+        this.flowchart_dragging_link.mx = mouseX / this.flowchart_scale;
+        this.flowchart_dragging_link.my = mouseY / this.flowchart_scale;
     });
   },
   methods: {
@@ -187,13 +192,15 @@ export default {
         e.pageY || e.clientY + document.documentElement.scrollTop;
     },
     handleMove(e) {
-      console.log("HANDLE MOVE CONTAINER");
+      // console.log("HANDLE MOVE CONTAINER",e);
       if (this.action.linking) {
         [this.mouse.x, this.mouse.y] = this.getMousePosition(this.$el, e);
-        [this.draggingLink.mx, this.draggingLink.my] = [
-          this.mouse.x,
-          this.mouse.y
-        ];
+
+        // //dragging link
+        // [this.draggingLink.mx, this.draggingLink.my] = [
+        //   this.mouse.x,
+        //   this.mouse.y
+        // ];
       }
       if (this.action.dragging) {
         this.mouse.x =
@@ -296,7 +303,7 @@ export default {
       };
     },
     lines() {
-      const lines = this.scene.links.map(link => {
+        const lines = this.scene.links.map(link => {
         const fromNode = this.findNodeWithID(link.from);
         const toNode = this.findNodeWithID(link.to);
         let x, y, cy, cx, ex, ey;
@@ -319,9 +326,10 @@ export default {
         y = this.scene.centerY + fromNode.y;
         [cx, cy] = this.getPortPosition("bottom", x, y);
         // push temp dragging link, mouse cursor postion = link end postion
+
         lines.push({
           start: [cx, cy],
-          end: [this.draggingLink.mx, this.draggingLink.my]
+          end: [this.flowchart_dragging_link.mx,this.flowchart_dragging_link.my]
         });
       }
       return lines;
