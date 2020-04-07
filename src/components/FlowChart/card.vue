@@ -7,7 +7,7 @@
     @dragover.stop
     :style="nodeStyle"
   >
-    <p>hellow world</p>
+    <p>{{name}}</p>
   </div>
 </template>
 
@@ -18,6 +18,10 @@ export default {
     draggable: {
       type: Boolean,
       default: true
+    },
+    name: {
+      type: String,
+      default: "no name"
     },
     options: {
       type: Object,
@@ -63,9 +67,9 @@ $portSize: 12;
   margin: 0;
   width: 80px;
   height: 80px;
-  position: absolute;
+  position: relative;
   box-sizing: border-box;
-  border: none;
+  border: 2px solid black;
   background: white;
   z-index: 1;
   opacity: 0.9;

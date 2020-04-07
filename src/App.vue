@@ -1,7 +1,12 @@
 <template>
   <div id="app">
     <!--<img alt="Vue logo" src="./assets/logo.png">-->
-    <card></card>
+    <div class="node-container">
+      <card name="decision"></card>
+      <card name="multipath"></card>
+      <card name="task"></card>
+      <card></card>
+    </div>
     <!--  TODO: create new ID for every new node  -->
     <!-- <card v-for="(node, index) in scene.nodes" v-bind:key="index" :id="index"></card> -->
     <div class="panzoom-parent">
@@ -122,5 +127,9 @@ export default {
   border: 3px solid red;
   height: 1000px;
   width: 1000px;
+}
+.node-container {
+  border: 3px solid black;
+  position: absolute;
 }
 </style>
