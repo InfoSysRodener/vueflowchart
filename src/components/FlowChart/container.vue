@@ -9,7 +9,7 @@
     @dragover.prevent
     @drop.prevent="drop"
   >
-    <svg width="100%" :height="`${height}px`">
+    <svg>
       <flowchart_link
         class="nodes"
         v-bind.sync="link"
@@ -323,6 +323,8 @@ export default {
   border: 10px solid yellow;
   svg {
     cursor: grab;
+    height: 4000px;
+    width: 15000px;
   }
 }
 // .flowchart-container {
