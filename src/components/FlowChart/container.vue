@@ -66,7 +66,7 @@ export default {
     }
   },
   data: () => ({
-    flowchart_scale:1,
+    flowchart_scale: 1,
     action: {
       linking: false,
       dragging: false,
@@ -93,7 +93,7 @@ export default {
       maxScale: 5,
       startX: 0,
       startY: 0,
-      contain: "outside", 
+      contain: "outside",
       excludeClass: "nodes"
     });
     parent.addEventListener("wheel", panzoom.zoomWithWheel);
@@ -102,18 +102,55 @@ export default {
     });
   },
   methods: {
-    drop(e) {
-      const card_id = e.dataTransfer.getData("card_id");
-      const title = e.dataTransfer.getData("title");
-      let dragX, dragY;
-      [ dragX,  dragY] = this.getMousePosition(this.$refs["flowchart_container"], e);
+    addNode({ id, x, y, label, type, cardTitle }) {
       this.scene.nodes.push({
-        id: parseInt(card_id),
-        x: dragX / this.flowchart_scale,
-        y: dragY / this.flowchart_scale,
-        type: title,
-        label: `test${card_id}`
+        id,
+        x,
+        y,
+        label,
+        type
       });
+    },
+    drop(e) {
+      console.log("DROP");
+      const type = e.dataTransfer.getData("type");
+      const card_title = e.dataTransfer.getData("title");
+      let dragX, dragY;
+      [dragX, dragY] = this.getMousePosition(
+        this.$refs["flowchart_container"],
+        e
+      );
+      const id = parseInt(e.dataTransfer.getData("card_id") + Math.random());
+      const x = dragX / this.flowchart_scale;
+      const y = dragY / this.flowchart_scale;
+      const label = `test${id}`;
+      console.log("TYPE: ", type);
+      if (type === "decision") {
+        const rejectParam = {
+          id: Math.random(),
+          cardTitle: "approve",
+          x: dragX - 200 / this.flowchart_scale,
+          y: dragY + 100 / this.flowchart_scale,
+          type: "reject",
+          label: "reject"
+        };
+        const approveParam = {
+          id: Math.random(),
+          cardTitle: "reject",
+          x: dragX + 200 / this.flowchart_scale,
+          y: dragY + 100 / this.flowchart_scale,
+          label: "reject",
+          type: "reject"
+        };
+        this.addNode({ id, card_title, id, x, y, label });
+        this.addNode(rejectParam);
+        this.addNode(approveParam);
+        // TODO: connect the nodes together
+        this.linkNodes({ from: id, to: rejectParam.id });
+        this.linkNodes({ from: id, to: approveParam.id });
+      } else {
+        this.addNode({ card_title, id, x, y, label });
+      }
     },
     findNodeWithID(id) {
       return this.scene.nodes.find(item => {
@@ -143,9 +180,12 @@ export default {
           return link.from === this.draggingLink.from && link.to === index;
         });
         if (!existed) {
-          let maxID = Math.max(0, ...this.scene.links.map(link => {
+          let maxID = Math.max(
+            0,
+            ...this.scene.links.map(link => {
               return link.id;
-            }));
+            })
+          );
           const newLink = {
             id: maxID + 1,
             from: this.draggingLink.from,
@@ -173,13 +213,18 @@ export default {
       this.action.dragging = id;
       this.action.selected = id;
       this.$emit("nodeClick", id);
-      this.mouse.lastX = e.pageX || e.clientX + document.documentElement.scrollLeft;
-      this.mouse.lastY = e.pageY || e.clientY + document.documentElement.scrollTop;
+      this.mouse.lastX =
+        e.pageX || e.clientX + document.documentElement.scrollLeft;
+      this.mouse.lastY =
+        e.pageY || e.clientY + document.documentElement.scrollTop;
     },
     handleMove(e) {
       // console.log("HANDLE MOVE CONTAINER",e);
       if (this.action.linking) {
-        [this.mouse.x, this.mouse.y] = this.getMousePosition(this.$refs["flowchart_container"], e);
+        [this.mouse.x, this.mouse.y] = this.getMousePosition(
+          this.$refs["flowchart_container"],
+          e
+        );
 
         //dragging link
         [this.draggingLink.mx, this.draggingLink.my] = [
@@ -188,9 +233,10 @@ export default {
         ];
       }
       if (this.action.dragging) {
-
-        this.mouse.x = e.pageX || e.clientX + document.documentElement.scrollLeft;
-        this.mouse.y = e.pageY || e.clientY + document.documentElement.scrollTop;
+        this.mouse.x =
+          e.pageX || e.clientX + document.documentElement.scrollLeft;
+        this.mouse.y =
+          e.pageY || e.clientY + document.documentElement.scrollTop;
 
         let diffX = this.mouse.x - this.mouse.lastX;
         let diffY = this.mouse.y - this.mouse.lastY;
@@ -201,7 +247,10 @@ export default {
         this.moveSelectedNode(diffX, diffY);
       }
       if (this.action.scrolling) {
-        [this.mouse.x, this.mouse.y] = this.getMousePosition(this.$refs["flowchart_container"], e);
+        [this.mouse.x, this.mouse.y] = this.getMousePosition(
+          this.$refs["flowchart_container"],
+          e
+        );
         let diffX = this.mouse.x - this.mouse.lastX;
         let diffY = this.mouse.y - this.mouse.lastY;
 
@@ -217,10 +266,16 @@ export default {
     handleUp(e) {
       const target = e.target || e.srcElement;
       if (this.$el.contains(target)) {
-        if (typeof target.className !== "string" || target.className.indexOf("node-input") < 0) {
+        if (
+          typeof target.className !== "string" ||
+          target.className.indexOf("node-input") < 0
+        ) {
           this.draggingLink = null;
         }
-        if (typeof target.className === "string" && target.className.indexOf("node-delete") > -1) {
+        if (
+          typeof target.className === "string" &&
+          target.className.indexOf("node-delete") > -1
+        ) {
           this.nodeDelete(this.action.dragging);
         }
       }
@@ -232,9 +287,15 @@ export default {
       console.log("HANDLE DOWN CONTAINER");
       const target = e.target || e.srcElement;
       // console.log('for scroll', target, e.keyCode, e.which)
-      if ((target === this.$el || target.matches("svg, svg *")) && e.which === 1) {
+      if (
+        (target === this.$el || target.matches("svg, svg *")) &&
+        e.which === 1
+      ) {
         this.action.scrolling = true;
-        [this.mouse.lastX, this.mouse.lastY] = this.getMousePosition(this.$refs["flowchart_container"], e);
+        [this.mouse.lastX, this.mouse.lastY] = this.getMousePosition(
+          this.$refs["flowchart_container"],
+          e
+        );
         this.action.selected = null; // deselectAll
       }
       this.$emit("canvasClick", e);
@@ -276,7 +337,7 @@ export default {
       };
     },
     lines() {
-        const lines = this.scene.links.map(link => {
+      const lines = this.scene.links.map(link => {
         const fromNode = this.findNodeWithID(link.from);
         const toNode = this.findNodeWithID(link.to);
         let x, y, cy, cx, ex, ey;
@@ -302,7 +363,7 @@ export default {
 
         lines.push({
           start: [cx, cy],
-          end: [this.draggingLink.mx,this.draggingLink.my]
+          end: [this.draggingLink.mx, this.draggingLink.my]
         });
       }
       return lines;

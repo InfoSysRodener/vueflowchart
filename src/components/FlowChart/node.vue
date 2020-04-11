@@ -113,6 +113,7 @@ export default {
       this.show.delete = true;
     },
     handleMouseLeave() {
+      console.log("Mouse Leave")
       this.show.delete = false;
     },
     outputMouseDown(e) {
