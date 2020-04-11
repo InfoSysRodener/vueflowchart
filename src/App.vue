@@ -37,26 +37,26 @@ export default {
         scale: 1,
         // BUG: allow for empty array to load. Currently there is bug if nodes is empty
         nodes: [
-          {
-            id: 2,
-            x: 0,
-            y: 0,
-            type: "Action",
-            label: "test1",
-            hasChildren:true,
-            children:[
-                {
-                    title:'Accept',
-                    x:0,
-                    y:0,
-                },
-                {
-                    title:'Reject',
-                    x:0,
-                    y:0,
-                }
-            ]
-          },
+          // {
+          //   id: 2,
+          //   x: 0,
+          //   y: 0,
+          //   type: "Action",
+          //   label: "test1",
+          //   hasChildren:true,
+          //   children:[
+          //       {
+          //           title:'Accept',
+          //           x:0,
+          //           y:0,
+          //       },
+          //       {
+          //           title:'Reject',
+          //           x:0,
+          //           y:0,
+          //       }
+          //   ]
+          // },
           // {
           //   id: 4,
           //   x: 200,
