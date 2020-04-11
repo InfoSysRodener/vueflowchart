@@ -1,20 +1,32 @@
 <!-- eslint-disable -->
 <template>
   <div
-    class="flowchart-node"
+    class="flowchart-operator"
     :style="nodeStyle"
     @mousedown="handleMousedown"
     @mouseover="handleMouseOver"
     @mouseleave="handleMouseLeave"
     v-bind:class="{selected: options.selected === id}"
   >
-    <div class="node-port node-input" @mousedown="inputMouseDown" @mouseup="inputMouseUp"></div>
-    <div class="node-main">
-      <div v-text="type" class="node-type"></div>
-      <div v-text="label" class="node-label"></div>
-    </div>
-    <div class="node-port node-output" @mousedown="outputMouseDown"></div>
-    <div v-show="show.delete" class="node-delete">&times;</div>
+      <div
+         class="flowchart-inputs node-port node-input"
+         @mousedown="inputMouseDown"
+         @mouseup="inputMouseUp"
+      >
+      </div>
+      <div class="flowchart-operator-title-icon">
+          <div class="flowchart-operator-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+                  <path fill="white" stroke="black" d="M4 1c-.55 0-.99.45-.99 1L3 16c0 .55.44 1 1 1h10c.55 0 1-.45 1-1V6l-5-5H4zm6 5V2l4 4h-4z"/>
+              </svg>
+          </div>
+          <div v-text="type" class="flowchart-operator-title"></div>
+      </div>
+      <div
+        class="flowchart-outputs node-port node-output"
+        @mousedown="outputMouseDown"
+      >
+      </div>
   </div>
 </template>
 
@@ -51,6 +63,10 @@ export default {
     label: {
       type: String,
       default: "input name"
+    },
+    hasChildren:{
+      type:Boolean,
+      default:false
     },
     options: {
       type: Object,
@@ -116,7 +132,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-$themeColor: rgb(255, 104, 81);
+$themeColor: rgb(44, 42, 46);
 $portSize: 12;
 
 .flowchart-node {
@@ -182,7 +198,73 @@ $portSize: 12;
     }
   }
 }
+
+.flowchart-operator{
+    position: relative;
+    box-sizing: border-box;
+    border: 2px solid black;
+    background: white;
+    z-index: 1;
+    opacity: 0.9;
+    cursor: move;
+    pointer-events: initial;
+    border-radius: 5px;
+    -webkit-box-shadow: -2px 0px 8px -4px rgba(0,0,0,0.75);
+    -moz-box-shadow: -2px 0px 8px -4px rgba(0,0,0,0.75);
+    box-shadow: -2px 0px 8px -4px rgba(0,0,0,0.75);
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    height: 50px;
+    .node-port {
+        position: absolute;
+        width: #{$portSize}px;
+        height: #{$portSize}px;
+        left: 50%;
+        transform: translate(-50%);
+        border: 1px solid #ccc;
+        border-radius: 100px;
+        background: white;
+        &:hover {
+            background: $themeColor;
+            border: 1px solid $themeColor;
+        }
+    }
+    .node-input {
+        top: #{-2 + $portSize/-2}px;
+    }
+    .node-output {
+        bottom: #{-2 + $portSize/-2}px;
+    }
+}
+.flowchart-operator-title-icon{
+    display: grid;
+    grid-template-columns: 20% 80%;
+    padding: 0 5px;
+    flex-grow: 1;
+}
+.flowchart-operator-icon{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+    border-radius: 5px;
+}
+.flowchart-operator-title{
+    width: 100%;
+    padding: 20px 0;
+    font-weight: bold;
+    height: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: move;
+    text-align: center;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    display: grid;
+    grid-template-columns: 20% 80%;
+}
 .selected {
-  box-shadow: 0 0 0 2px $themeColor;
+    border: 3px solid #51eaea;
 }
 </style>

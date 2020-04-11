@@ -105,10 +105,12 @@ export default {
     drop(e) {
       const card_id = e.dataTransfer.getData("card_id");
       const title = e.dataTransfer.getData("title");
+      let dragX, dragY;
+      [ dragX,  dragY] = this.getMousePosition(this.$refs["flowchart_container"], e);
       this.scene.nodes.push({
         id: parseInt(card_id),
-        x: e.x,
-        y: e.y,
+        x: dragX / this.flowchart_scale,
+        y: dragY / this.flowchart_scale,
         type: title,
         label: `test${card_id}`
       });
@@ -120,9 +122,9 @@ export default {
     },
     getPortPosition(type, x, y) {
       if (type === "top") {
-        return [x + 40, y];
+        return [x + 300 / 2, y];
       } else if (type === "bottom") {
-        return [x + 40, y + 80];
+        return [x + 300 / 2, y + 45];
       }
     },
     linkingStart(index) {
@@ -320,11 +322,11 @@ export default {
   overflow: hidden;
   height: 4000px;
   width: 15000px;
-  border: 10px solid yellow;
+  border: 1px solid yellow;
   svg {
     cursor: grab;
     height: 4000px;
-    width: 15000px;
+    width: 100%;
   }
 }
 // .flowchart-container {

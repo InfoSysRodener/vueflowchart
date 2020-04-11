@@ -1,14 +1,33 @@
+<!-- eslint-disable -->
 <template>
-  <div
-    class="flowchart-node"
-    :draggable="draggable"
-    @dragstart="dragStart"
-    @dragend="ondragend"
-    @dragover.stop
-    :style="nodeStyle"
-  >
-    <p>{{name}}</p>
-  </div>
+    <div
+      class="flowchart-operator-toolbar"
+    >
+        <div
+                v-for="operator in flowchartOperators"
+                :key="operator.title"
+                :id="operator.title"
+                class="flowchart-operator"
+                :draggable="draggable"
+                @dragstart="dragStart"
+                @dragend="ondragend"
+                @dragover.stop
+        >
+            <!--<div class="flowchart-inputs"></div>-->
+            <div class="toolbar-operator-title-icon">
+                <div class="toolbar-operator-icon" :style="{ background:operator.color}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+                        <path fill="white" stroke="black" d="M4 1c-.55 0-.99.45-.99 1L3 16c0 .55.44 1 1 1h10c.55 0 1-.45 1-1V6l-5-5H4zm6 5V2l4 4h-4z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="toolbar-operator-title">
+                {{ operator.title }}
+            </div>
+            <!--<div class="flowchart-outputs"></div>-->
+        </div>
+    </div>
+
 </template>
 
 <script>
@@ -34,12 +53,38 @@ export default {
       }
     }
   },
+  data:() => ({
+        flowchartOperators:[
+            {
+                title:'Start',
+                icon:'',
+                color:'#018383'
+            },
+            {
+                title:'Task',
+                icon:'',
+            },
+            {
+                title:'Decision',
+                icon:'',
+            },
+            {
+                title:'End',
+                icon:'',
+            },
+            {
+                title:'MultiPath',
+                icon:'',
+            },
+
+        ]
+  }),
   methods: {
     dragStart(e) {
-      console.log("dragStart", e.target.id);
+      console.log("dragStart", e.target);
       const card_id = Math.floor(Math.random() * 1000);
       e.dataTransfer.setData("card_id", card_id);
-      e.dataTransfer.setData("title", "start");
+      e.dataTransfer.setData("title", e.target.id);
     },
     ondragend(e) {
       console.log("dragleave", e);
@@ -54,81 +99,61 @@ export default {
         left: this.options.centerX + this.x * this.options.scale + "px", // remove: this.options.offsetLeft +
         transform: `scale(${this.options.scale})`
       };
-    }
+    },
   }
 };
 </script>
 
 <style scoped lang="scss">
-$themeColor: rgb(255, 136, 85);
-$portSize: 12;
-
-.flowchart-node {
-  margin: 0;
-  width: 80px;
-  height: 80px;
-  position: relative;
-  box-sizing: border-box;
-  border: 2px solid black;
-  background: white;
-  z-index: 1;
-  opacity: 0.9;
-  cursor: move;
-  transform-origin: top left;
-  .node-main {
-    text-align: center;
-    .node-type {
-      background: $themeColor;
-      color: white;
-      font-size: 13px;
-      padding: 6px;
+    .flowchart-operator-toolbar{
+        width: 100%;
+        flex-grow: 3;
     }
-    .node-label {
-      font-size: 13px;
+    .flowchart-operator{
+        width: 100%;
+        height: 70px;
+        display: inline-grid;
+        grid-template-columns: 25% 75%;
+        padding: 10px 15px;
+        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        cursor: pointer;
+        border: 1px solid #ffffff;
     }
-  }
-  .node-port {
-    position: absolute;
-    width: #{$portSize}px;
-    height: #{$portSize}px;
-    left: 50%;
-    transform: translate(-50%);
-    border: 1px solid #ccc;
-    border-radius: 100px;
-    background: white;
-    &:hover {
-      background: $themeColor;
-      border: 1px solid $themeColor;
+    .toolbar-operator-title-icon{
+        text-align: center;
+        color: #2c2a2e;
+        border-radius: 5px;
+        padding: 1px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-  }
-  .node-input {
-    top: #{-2 + $portSize/-2}px;
-  }
-  .node-output {
-    bottom: #{-2 + $portSize/-2}px;
-  }
-  .node-delete {
-    position: absolute;
-    right: -6px;
-    top: -6px;
-    font-size: 12px;
-    width: 12px;
-    height: 12px;
-    color: $themeColor;
-    cursor: pointer;
-    background: white;
-    border: 1px solid $themeColor;
-    border-radius: 100px;
-    text-align: center;
-    &:hover {
-      background: $themeColor;
-      color: white;
+    .toolbar-operator-icon{
+        /*display: flex;*/
+        /*justify-content: center;*/
+        /*align-items: center;*/
+        /*color: #ffffff;*/
+        /*border-radius: 5px;*/
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        -webkit-font-feature-settings: 'liga';
+        -webkit-font-smoothing: antialiased;
     }
-  }
-}
-.selected {
-  box-shadow: 0 0 0 2px $themeColor;
-}
+    .toolbar-operator-title{
+        padding-left: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+    }
 </style>
 <!--<style scoped>-->
     <!--.card {-->
