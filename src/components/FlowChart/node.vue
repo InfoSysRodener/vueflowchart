@@ -1,7 +1,6 @@
 <!-- eslint-disable -->
 <template>
   <div
-    class="flowchart-operator"
     :style="nodeStyle"
     @mousedown="handleMousedown"
     @mouseover="handleMouseOver"
@@ -9,31 +8,78 @@
     v-bind:class="{selected: options.selected === id}"
   >
       <div
-         class="flowchart-inputs node-port node-input"
          @mousedown="inputMouseDown"
          @mouseup="inputMouseUp"
       >
-      </div>
-      <div class="flowchart-operator-title-icon">
-          <div class="flowchart-operator-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
-                  <path fill="white" stroke="black" d="M4 1c-.55 0-.99.45-.99 1L3 16c0 .55.44 1 1 1h10c.55 0 1-.45 1-1V6l-5-5H4zm6 5V2l4 4h-4z"/>
-              </svg>
+          <div v-if="type === 'start'">
+              <flowchart-node-start
+                 :type="type"
+                 @selectOutputNodePort="handleSelectOutputNodePort"
+              >
+              </flowchart-node-start>
           </div>
-          <div v-text="type" class="flowchart-operator-title"></div>
-      </div>
-      <div
-        class="flowchart-outputs node-port node-output"
-        @mousedown="outputMouseDown"
-      >
+          <div v-else-if="type === 'task'">
+              <flowchart-node-task
+                :type="type"
+                @selectOutputNodePort="handleSelectOutputNodePort"
+              >
+              </flowchart-node-task>
+          </div>
+          <div v-else-if="type === 'end'">
+              <flowchart-node-end
+                 :type="type"
+              >
+              </flowchart-node-end>
+          </div>
+          <div v-else-if="type === 'decision' || type === 'approve' || type === 'reject'">
+               <flowchart-node-decision
+                   :type="type"
+                   @selectOutputNodePort="handleSelectOutputNodePort"
+               >
+
+               </flowchart-node-decision>
+          </div>
+          <div v-else-if="type === 'multipath' || type === 'path'">
+
+              <flowchart-node-multipath
+                  v-if="type === 'multipath'"
+                  :type="type"
+                  :id="id"
+                  :x="x"
+                  :y="y"
+                  @createNewPath="handleCreateNewPath"
+              >
+              </flowchart-node-multipath>
+
+              <flowchart-node-path
+                 v-if="type === 'path'"
+                 :type="type"
+                 @selectOutputNodePort="handleSelectOutputNodePort"
+              >
+              </flowchart-node-path>
+          </div>
       </div>
   </div>
 </template>
-
 <script>
 /* eslint-disable */
+import flowchartNodeEnd from '@/components/Nodes/end';
+import flowchartNodeStart from '@/components/Nodes/start';
+import flowchartNodeTask from '@/components/Nodes/task';
+import flowchartNodeDecision from  '@/components/Nodes/decision';
+import flowchartNodeMultipath from  '@/components/Nodes/multipath';
+import flowchartNodePath from  '@/components/Nodes/path';
+
 export default {
   name: "node",
+  components:{
+      flowchartNodeEnd,
+      flowchartNodeStart,
+      flowchartNodeTask,
+      flowchartNodeDecision,
+      flowchartNodeMultipath,
+      flowchartNodePath
+  },
   props: {
     id: {
       type: Number,
@@ -97,9 +143,7 @@ export default {
   },
   methods: {
     handleMousedown(e) {
-      console.log("MOUSE DOWN");
       const target = e.target || e.srcElement;
-      // console.log(target);
       if (
         target.className.indexOf("node-input") < 0 &&
         target.className.indexOf("node-output") < 0
@@ -109,16 +153,13 @@ export default {
       e.preventDefault();
     },
     handleMouseOver() {
-      console.log("MOUSE OVER");
       this.show.delete = true;
     },
     handleMouseLeave() {
-      console.log("Mouse Leave")
       this.show.delete = false;
     },
-    outputMouseDown(e) {
+    handleSelectOutputNodePort() {
       this.$emit("linkingStart");
-      e.preventDefault();
     },
     inputMouseDown(e) {
       e.preventDefault();
@@ -126,79 +167,20 @@ export default {
     inputMouseUp(e) {
       this.$emit("linkingStop");
       e.preventDefault();
+    },
+    handleCreateNewPath(data){
+        this.$emit('creatingNewPath',data);
     }
   },
-  mounted() {}
+  mounted() {
+
+  }
 };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 $themeColor: rgb(44, 42, 46);
 $portSize: 12;
-
-.flowchart-node {
-  margin: 0;
-  width: 80px;
-  height: 80px;
-  position: absolute;
-  box-sizing: border-box;
-  border: none;
-  background: white;
-  z-index: 999;
-  opacity: 0.9;
-  cursor: move;
-  transform-origin: top left;
-  .node-main {
-    text-align: center;
-    .node-type {
-      background: $themeColor;
-      color: white;
-      font-size: 13px;
-      padding: 6px;
-    }
-    .node-label {
-      font-size: 13px;
-    }
-  }
-  .node-port {
-    position: absolute;
-    width: #{$portSize}px;
-    height: #{$portSize}px;
-    left: 50%;
-    transform: translate(-50%);
-    border: 1px solid #ccc;
-    border-radius: 100px;
-    background: white;
-    &:hover {
-      background: $themeColor;
-      border: 1px solid $themeColor;
-    }
-  }
-  .node-input {
-    top: #{-2 + $portSize/-2}px;
-  }
-  .node-output {
-    bottom: #{-2 + $portSize/-2}px;
-  }
-  .node-delete {
-    position: absolute;
-    right: -6px;
-    top: -6px;
-    font-size: 12px;
-    width: 12px;
-    height: 12px;
-    color: $themeColor;
-    cursor: pointer;
-    background: white;
-    border: 1px solid $themeColor;
-    border-radius: 100px;
-    text-align: center;
-    &:hover {
-      background: $themeColor;
-      color: white;
-    }
-  }
-}
 
 .flowchart-operator{
     position: relative;
@@ -237,33 +219,6 @@ $portSize: 12;
     .node-output {
         bottom: #{-2 + $portSize/-2}px;
     }
-}
-.flowchart-operator-title-icon{
-    display: grid;
-    grid-template-columns: 20% 80%;
-    padding: 0 5px;
-    flex-grow: 1;
-}
-.flowchart-operator-icon{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #ffffff;
-    border-radius: 5px;
-}
-.flowchart-operator-title{
-    width: 100%;
-    padding: 20px 0;
-    font-weight: bold;
-    height: auto;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    cursor: move;
-    text-align: center;
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    display: grid;
-    grid-template-columns: 20% 80%;
 }
 .selected {
     border: 3px solid #51eaea;

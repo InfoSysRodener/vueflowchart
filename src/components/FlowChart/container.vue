@@ -6,6 +6,7 @@
     @mousemove="handleMove"
     @mouseup="handleUp"
     @mousedown="handleDown"
+    @click="handleTemporaryLink"
     @dragover.prevent
     @drop.prevent="drop"
   >
@@ -18,6 +19,12 @@
         @deleteLink="linkDelete(link.id)"
         :options="nodeOptions"
       />
+      <flowchart_temporary_link
+         :start="temporaryLink.start"
+         :end="temporaryLink.end"
+         v-if="temporaryLinkShow"
+      >
+      </flowchart_temporary_link>
     </svg>
     <flowchart_node
       v-bind.sync="node"
@@ -27,7 +34,7 @@
       @linkingStart="linkingStart(node.id)"
       @linkingStop="linkingStop(node.id)"
       @nodeSelected="nodeSelected(node.id, $event)"
-      @click="console.log('clicking')"
+      @creatingNewPath="creatingNewPath"
       class="nodes"
     ></flowchart_node>
     <slot></slot>
@@ -36,16 +43,19 @@
 
 <script>
 /* eslint-disable */
-import { flowchatMixins } from "../../mixins";
+import { flowchatMixins } from "../../mixins/mixins";
 import flowchart_link from "./link.vue";
 import flowchart_node from "./node.vue";
+import flowchart_temporary_link from "./temporaryLink.vue";
+
 const Panzoom = require("../../dist/panzoom.js");
 export default {
   mixins: [flowchatMixins],
   name: "container",
   components: {
     flowchart_link,
-    flowchart_node
+    flowchart_node,
+    flowchart_temporary_link
   },
   props: {
     scene: {
@@ -83,7 +93,12 @@ export default {
     rootDivOffset: {
       top: 0,
       left: 0
-    }
+    },
+    temporaryLink:{
+      start:[],
+      end:[]
+    },
+    temporaryLinkShow:false
   }),
   mounted() {
     let $flowchart = this.$refs["flowchart_container"];
@@ -102,60 +117,91 @@ export default {
     });
   },
   methods: {
-    addNode({ id, x, y, label, type, cardTitle }) {
+
+    addNode(data) {
+      let { dragX , dragY } = data;
       this.scene.nodes.push({
-        id,
-        x,
-        y,
-        label,
-        type
+          label:data.type,
+          x: dragX,
+          y: dragY,
+          ...data
       });
     },
+    addDecisionNode(data){
+
+      let { id , dragX , dragY } = data;
+
+      let scale = this.flowchart_scale;
+
+      const approveParam = {
+        id:  parseFloat(id + '.' + Math.floor(Math.random() * 1000)),
+        x: dragX - (200 * scale) / scale,
+        y: dragY + (100 * scale)  / scale,
+        type: "approve",
+        label: "approve"
+      };
+      const rejectParam = {
+        id:  parseFloat(id + '.' + Math.floor(Math.random() * 1000)),
+        x: dragX + (200 * scale) / scale ,
+        y: dragY + (100 * scale) / scale,
+        label: "reject",
+        type: "reject"
+      };
+
+      this.addNode(data);
+      this.scene.nodes.push(approveParam);
+      this.scene.nodes.push(rejectParam);
+
+      this.linkingNodes({from:id,to:rejectParam.id});
+      this.linkingNodes({from:id,to:approveParam.id});
+
+    },
+    addMultipathNode(data) {
+
+      let { type , dragX , dragY } = data;
+
+      this.scene.nodes.push({
+        label:type,
+        x: dragX,
+        y: dragY,
+        ...data
+      });
+
+
+
+    },
     drop(e) {
-      console.log("DROP");
       const type = e.dataTransfer.getData("type");
-      const card_title = e.dataTransfer.getData("title");
-      let dragX, dragY;
-      [dragX, dragY] = this.getMousePosition(
+      const id = parseInt(e.dataTransfer.getData("card_id"));
+
+      let [dragX, dragY] = this.getMousePosition(
         this.$refs["flowchart_container"],
         e
       );
-      const id = parseInt(e.dataTransfer.getData("card_id") + Math.random());
-      const x = dragX / this.flowchart_scale;
-      const y = dragY / this.flowchart_scale;
-      const label = `test${id}`;
-      console.log("TYPE: ", type);
-      if (type === "decision") {
-        const rejectParam = {
-          id: Math.random(),
-          cardTitle: "approve",
-          x: dragX - 200 / this.flowchart_scale,
-          y: dragY + 100 / this.flowchart_scale,
-          type: "reject",
-          label: "reject"
-        };
-        const approveParam = {
-          id: Math.random(),
-          cardTitle: "reject",
-          x: dragX + 200 / this.flowchart_scale,
-          y: dragY + 100 / this.flowchart_scale,
-          label: "reject",
-          type: "reject"
-        };
-        this.addNode({ id, card_title, id, x, y, label });
-        this.addNode(rejectParam);
-        this.addNode(approveParam);
-        // TODO: connect the nodes together
-        this.linkNodes({ from: id, to: rejectParam.id });
-        this.linkNodes({ from: id, to: approveParam.id });
+
+      const nodeData = {
+          id:id,
+          dragX:dragX / this.flowchart_scale,
+          dragY:dragY / this.flowchart_scale,
+          type:type
+      };
+
+      if(type === 'decision'){
+        this.addDecisionNode(nodeData);
+      } else if(type === 'multipath'){
+        this.addMultipathNode(nodeData);
       } else {
-        this.addNode({ card_title, id, x, y, label });
+        this.addNode(nodeData);
       }
+
     },
     findNodeWithID(id) {
       return this.scene.nodes.find(item => {
         return id === item.id;
       });
+    },
+    handleTemporaryLink(){
+      this.temporaryLinkShow = false;
     },
     getPortPosition(type, x, y) {
       if (type === "top") {
@@ -284,6 +330,10 @@ export default {
       this.action.scrolling = false;
     },
     handleDown(e) {
+
+      this.temporaryLinkShow = false;
+
+
       console.log("HANDLE DOWN CONTAINER");
       const target = e.target || e.srcElement;
       // console.log('for scroll', target, e.keyCode, e.which)
@@ -323,6 +373,51 @@ export default {
         return link.from !== id && link.to !== id;
       });
       this.$emit("nodeDelete", id);
+    },
+
+    creatingNewPath(data){
+
+      let { id , x , y } = data;
+
+      let scale = this.flowchart_scale;
+
+      const randomId = Math.floor(Math.random() * 1000);
+
+
+      //get all path nodes
+      let pathNodeId =  this.scene.nodes.filter(node => node.type === 'path').map(node => node.id);
+      let maxID = Math.max(0, ...pathNodeId);
+
+
+      const pathParams = {
+        id:  parseFloat(id + '.' + randomId),
+        x: x - ((200) * scale) / scale,
+        y: y + ((100) * scale)  / scale,
+        type: "path",
+        label: "path"
+      };
+
+      this.scene.nodes.push(pathParams);
+
+      this.linkingNodes({from:id,to:pathParams.id});
+
+
+    },
+    linkingNodes({ from , to }){
+
+        let linkId = this.scene.links.map(link => link.id);
+
+        let maxID = Math.max(0, ...linkId);
+
+        const newLink = {
+          id: maxID + 1,
+          from: from,
+          to: to
+        };
+        this.scene.links.push(newLink);
+
+        this.$emit("linkAdded", newLink);
+
     }
   },
   computed: {
@@ -353,18 +448,29 @@ export default {
           id: link.id
         };
       });
+
+
+      // show temporary link
       if (this.draggingLink) {
+        console.log(this.draggingLink);
         let x, y, cy, cx;
         const fromNode = this.findNodeWithID(this.draggingLink.from);
         x = this.scene.centerX + fromNode.x;
         y = this.scene.centerY + fromNode.y;
         [cx, cy] = this.getPortPosition("bottom", x, y);
         // push temp dragging link, mouse cursor postion = link end postion
+        // show temporary link
 
-        lines.push({
-          start: [cx, cy],
-          end: [this.draggingLink.mx, this.draggingLink.my]
-        });
+        this.temporaryLinkShow = true;
+        this.temporaryLink.start = [cx, cy];
+        this.temporaryLink.end = [this.draggingLink.mx, this.draggingLink.my];
+
+        // lines.push({
+        //   start: [cx, cy],
+        //   end: [this.draggingLink.mx, this.draggingLink.my]
+        // });
+      }else{
+        this.temporaryLinkShow = false;
       }
       return lines;
     }
@@ -373,6 +479,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
+
 #panzoom-element {
   position: relative;
   width: 3000px;
@@ -390,15 +497,7 @@ export default {
     width: 100%;
   }
 }
-// .flowchart-container {
-//   margin: 0;
-//   background: #ededed;
-//   position: relative;
-//   overflow: hidden;
-//   svg {
-//     cursor: grab;
-//   }
-// }
+
 .nodes {
   z-index: 999;
   position: absolute;

@@ -1,25 +1,19 @@
 <template>
   <g @mouseover="handleMouseOver" @mouseleave="handleMouseLeave">
     <path :d="dAttr" :style="pathStyle"></path>
-    <!--<a v-if="show.delete" @click="deleteLink">-->
-      <!--<text text-anchor="middle" :transform="arrowTransform" font-size="22">&times;</text>-->
-    <!--</a>-->
-    <!--<path  d="M -1 -1 L 0 1 L 1 -1 z" :style="arrowStyle" :transform="arrowTransform"></path>-->
   </g>
 </template>
 
 <script>
 export default {
-  name: "link",
+  name: "links",
   props: {
-    // start point position [x, y]
     start: {
       type: Array,
       default() {
         return [0, 0];
       }
     },
-    // end point position [x, y]
     end: {
       type: Array,
       default() {
@@ -51,24 +45,6 @@ export default {
     handleMouseLeave() {
       this.show.delete = false;
     },
-    caculateCenterPoint() {
-      // caculate arrow position: the center point between start and end
-      const dx = (this.end[0] - this.start[0]) / 2;
-      const dy = (this.end[1] - this.start[1]) / 2;
-      return [this.start[0] + dx, this.start[1] + dy];
-    },
-    caculateRotation() {
-      // caculate arrow rotation
-      const angle = -Math.atan2(
-        this.end[0] - this.start[0],
-        this.end[1] - this.start[1]
-      );
-      const degree = (angle * 180) / Math.PI;
-      return degree < 0 ? degree + 360 : degree;
-    },
-    deleteLink() {
-      this.$emit("deleteLink");
-    }
   },
   computed: {
     pathStyle() {
@@ -78,18 +54,6 @@ export default {
         fill: "none",
         transform: `scale(${this.options.scale})`
       };
-    },
-    arrowStyle() {
-      return {
-        stroke: "rgb(255, 136, 85)",
-        strokeWidth: 5.73205,
-        fill: "none"
-      };
-    },
-    arrowTransform() {
-      const [arrowX, arrowY] = this.caculateCenterPoint();
-      const degree = this.caculateRotation();
-      return `translate(${arrowX}, ${arrowY}) rotate(${degree})`;
     },
     dAttr() {
       let cx = this.start[0],
@@ -103,10 +67,7 @@ export default {
       return `M ${cx}, ${cy} L ${x1}, ${y1}, ${x2}, ${y2}, ${ex}, ${ey}`;
     }
   },
-  mounted() {
-    console.log("start", this.start);
-    console.log("end", this.end);
-  }
+  mounted() {}
 };
 </script>
 

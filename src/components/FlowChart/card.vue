@@ -3,9 +3,9 @@
   <div class="flowchart-operator-toolbar">
     <div
       v-for="operator in flowchartOperators"
-      :key="operator.title"
+      :key="operator.type"
       :id="operator.type"
-      class="flowchart-operator"
+      class="toolbar-operator"
       :draggable="draggable"
       @dragstart="dragStart"
       @dragend="ondragend"
@@ -72,7 +72,7 @@ export default {
       },
       {
         title: "End",
-        type: "label",
+        type: "end",
         icon: ""
       },
       {
@@ -112,7 +112,7 @@ export default {
   width: 100%;
   flex-grow: 3;
 }
-.flowchart-operator {
+.toolbar-operator {
   width: 100%;
   height: 70px;
   display: inline-grid;
