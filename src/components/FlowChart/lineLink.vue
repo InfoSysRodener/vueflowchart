@@ -11,12 +11,12 @@
               stroke-linecap="round"
            >
            </line>
-           <path
-             fill="black"
-             :d="setArrowPosition"
-           >
-           </path>
        </g>
+        <path
+           fill="black"
+           :d="setArrowPosition"
+        >
+        </path>
    </g>
 
 </template>
@@ -46,7 +46,7 @@
                 let fromX = this.start[0];
                 let fromY = this.start[1];
                 let toX = this.end[0];
-                let toY = this.end[1] - 5;
+                let toY = this.end[1];
                 let diffX = fromX - toX;
                 let diffY = fromY - toY;
                 const isHigherY = 30;
@@ -159,8 +159,6 @@
                 }
                 return  Object.keys(linesData).map(i => linesData[i]);
             },
-
-
             setArrowPosition(){
                 let fromX = this.start[0];
                 let fromY = this.start[1];

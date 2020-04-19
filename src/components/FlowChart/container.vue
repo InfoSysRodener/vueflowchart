@@ -170,7 +170,7 @@ export default {
     },
     addMultipathNode(data) {
 
-      let { type , dragX , dragY } = data;
+      let { id, type , dragX , dragY } = data;
 
       this.scene.nodes.push({
         label:type,
@@ -179,7 +179,12 @@ export default {
         ...data
       });
 
-
+      //create default path
+      this.creatingNewPath({
+        id:id,
+        x:dragX,
+        y:dragY
+      });
 
     },
     drop(e) {
@@ -395,12 +400,6 @@ export default {
 
       const randomId = Math.floor(Math.random() * 1000);
 
-
-      //get all path nodes
-      let pathNodeId =  this.scene.nodes.filter(node => node.type === 'path').map(node => node.id);
-      let maxID = Math.max(0, ...pathNodeId);
-
-
       const pathParams = {
         id:  parseFloat(id + '.' + randomId),
         x: x - ((200) * scale) / scale,
@@ -412,7 +411,6 @@ export default {
       this.scene.nodes.push(pathParams);
 
       this.linkingNodes({from:id,to:pathParams.id});
-
 
     },
     linkingNodes({ from , to }){
