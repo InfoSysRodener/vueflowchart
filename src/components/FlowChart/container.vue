@@ -11,14 +11,24 @@
     @drop.prevent="drop"
   >
     <svg>
-      <flowchart_link
-        class="nodes"
-        v-bind.sync="link"
-        v-for="(link, index) in lines"
-        :key="`${index}`"
-        @deleteLink="linkDelete(link.id)"
-        :options="nodeOptions"
-      />
+      <flowchart_line_link
+         class="nodes"
+         v-bind.sync="link"
+         v-for="(link, index) in lines"
+         :key="`${index}`"
+         @deleteLink="linkDelete(link.id)"
+         :options="nodeOptions"
+      >
+
+      </flowchart_line_link>
+      <!--<flowchart_link-->
+        <!--class="nodes"-->
+        <!--v-bind.sync="link"-->
+        <!--v-for="(link, index) in lines"-->
+        <!--:key="`${index}`"-->
+        <!--@deleteLink="linkDelete(link.id)"-->
+        <!--:options="nodeOptions"-->
+      <!--/>-->
       <flowchart_temporary_link
          :start="temporaryLink.start"
          :end="temporaryLink.end"
@@ -47,6 +57,7 @@ import { flowchatMixins } from "../../mixins/mixins";
 import flowchart_link from "./link.vue";
 import flowchart_node from "./node.vue";
 import flowchart_temporary_link from "./temporaryLink.vue";
+import flowchart_line_link from "./lineLink.vue";
 
 const Panzoom = require("../../dist/panzoom.js");
 export default {
@@ -55,7 +66,8 @@ export default {
   components: {
     flowchart_link,
     flowchart_node,
-    flowchart_temporary_link
+    flowchart_temporary_link,
+    flowchart_line_link
   },
   props: {
     scene: {
