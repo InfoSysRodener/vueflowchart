@@ -46,7 +46,7 @@
                 let fromX = this.start[0];
                 let fromY = this.start[1];
                 let toX = this.end[0];
-                let toY = this.end[1];
+                let toY = this.end[1] - 5;
                 let diffX = fromX - toX;
                 let diffY = fromY - toY;
                 const isHigherY = 30;
@@ -64,10 +64,10 @@
                             y2: toY
                         },
                         line2: {
-                            x1: 0,
-                            y1: 0,
-                            x2: 0,
-                            y2: 0
+                            x1: fromX,
+                            y1: fromY,
+                            x2: toX,
+                            y2: toY
                         },
                         line3: {
                             x1: 0,
