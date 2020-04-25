@@ -5,7 +5,7 @@
     @mousedown="handleMousedown"
     @mouseover="handleMouseOver"
     @mouseleave="handleMouseLeave"
-    v-bind:class="{selected: options.selected === id}"
+
   >
       <div
          @mousedown="inputMouseDown"
@@ -13,6 +13,7 @@
       >
           <div v-if="type === 'start'">
               <flowchart-node-start
+                 v-bind:class="{selected: options.selected === id}"
                  :type="type"
                  @selectOutputNodePort="handleSelectOutputNodePort"
               >
@@ -20,6 +21,7 @@
           </div>
           <div v-else-if="type === 'task'">
               <flowchart-node-task
+                v-bind:class="{selected: options.selected === id}"
                 :type="type"
                 @selectOutputNodePort="handleSelectOutputNodePort"
               >
@@ -27,12 +29,14 @@
           </div>
           <div v-else-if="type === 'end'">
               <flowchart-node-end
+                 v-bind:class="{selected: options.selected === id}"
                  :type="type"
               >
               </flowchart-node-end>
           </div>
           <div v-else-if="type === 'decision' || type === 'approve' || type === 'reject'">
                <flowchart-node-decision
+                   v-bind:class="{selected: options.selected === id}"
                    :type="type"
                    @selectOutputNodePort="handleSelectOutputNodePort"
                >
@@ -55,6 +59,7 @@
                  v-if="type === 'path'"
                  :type="type"
                  @selectOutputNodePort="handleSelectOutputNodePort"
+                 v-bind:class="{selected: options.selected === id}"
               >
               </flowchart-node-path>
           </div>
@@ -123,6 +128,14 @@ export default {
           centerY: 0
         };
       }
+    },
+    width:{
+        type:[String,Number],
+        default:100
+    },
+    height:{
+        type:[String,Number],
+        default:100
     }
   },
   data() {
@@ -137,7 +150,9 @@ export default {
       return {
         top: this.options.centerY + this.y * this.options.scale + "px", // remove: this.options.offsetTop +
         left: this.options.centerX + this.x * this.options.scale + "px", // remove: this.options.offsetLeft +
-        transform: `scale(${this.options.scale})`
+        transform: `scale(${this.options.scale})`,
+        width:`${this.width}px`,
+        height:`${this.height}px`,
       };
     }
   },
@@ -197,8 +212,8 @@ $portSize: 12;
     box-shadow: -2px 0px 8px -4px rgba(0,0,0,0.75);
     display: flex;
     flex-direction: column;
-    width: 300px;
-    height: 50px;
+    /*width: 300px;*/
+    /*height: 60px;*/
     .node-port {
         position: absolute;
         width: #{$portSize}px;
@@ -219,6 +234,34 @@ $portSize: 12;
     .node-output {
         bottom: #{-2 + $portSize/-2}px;
     }
+}
+.flowchart-operator-title-icon{
+    display: grid;
+    grid-template-columns: 20% 80%;
+    padding: 0 5px;
+    flex-grow: 1;
+}
+.flowchart-operator-icon{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+    border-radius: 5px;
+}
+.flowchart-operator-title{
+    width: 100%;
+    text-transform: uppercase;
+    padding: 20px 0;
+    font-weight: bold;
+    height: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: move;
+    text-align: center;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    display: grid;
+    grid-template-columns: 75% 25%;
 }
 .selected {
     border: 3px solid #51eaea;

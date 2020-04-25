@@ -1,11 +1,13 @@
 <template>
-    <div  class="flowchart-operator">
-        <div>
-            <div class="flowchart-operator-title-icon">
-                <div class="flowchart-operator-icon">
+    <div class="flowchart-operator">
+        <div class="flowchart-operator-title-icon">
+            <div class="flowchart-operator-icon">
 
-                </div>
-                <div v-text="type" class="flowchart-operator-title"></div>
+            </div>
+            <div
+                 v-text="type"
+                 class="flowchart-operator-title"
+            >
             </div>
         </div>
         <div

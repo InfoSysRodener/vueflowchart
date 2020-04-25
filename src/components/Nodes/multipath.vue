@@ -1,17 +1,21 @@
 <template>
-    <div class="flowchart-operator">
-        <div class="flowchart-operator-title-icon">
-            <div class="flowchart-operator-icon">
 
+        <div class="flowchart-operator-multipath">
+            <!--<div class="flowchart-operator-title-icon">-->
+                <!--<div class="flowchart-operator-icon">-->
+
+                <!--</div>-->
+                <!--<div v-text="type" class="flowchart-operator-multipath-title"></div>-->
+            <!--</div>-->
+            <div v-text="type" class="flowchart-operator-multipath-title"></div>
+            <div class="node-port node-output">
             </div>
-            <div v-text="type" class="flowchart-operator-title"></div>
+            <div >
+                <button  @click="createPath" class="add-path-btn"> + </button>
+            </div>
         </div>
-        <div
-          class="node-port node-output"
-        >
-        </div>
-        <button @click="createPath"> add path </button>
-    </div>
+
+
 </template>
 
 <script>
@@ -53,6 +57,8 @@
                     id:this.id,
                     x:this.x,
                     y:this.y,
+                    width:300,
+                    height:60
                 });
             }
         }
@@ -60,36 +66,76 @@
 </script>
 
 <style scoped lang="scss">
-    .flowchart-operator-diamond{
+    $themeColor: rgb(44, 42, 46);
+    $portSize: 12;
 
-    }
-    .diamond {
+    .flowchart-operator-multipath{
         position: relative;
-        height: 200px;
-        width: 200px;
-        line-height: 200px;
-        text-align: center;
-        margin: 10px 40px;
+        margin:10px 10px;
+        box-sizing: border-box;
+        border: 2px solid black;
+        background: white;
+        z-index: 1;
+        opacity: 0.9;
+        cursor: move;
+        pointer-events: initial;
+        border-radius: 5px;
+        -webkit-box-shadow: -2px 0px 8px -4px rgba(0,0,0,0.75);
+        -moz-box-shadow: -2px 0px 8px -4px rgba(0,0,0,0.75);
+        box-shadow: -2px 0px 8px -4px rgba(0,0,0,0.75);
+        transform:rotate(43deg);
+        -ms-transform:rotate(43deg);
+        -webkit-transform:rotate(43deg);
+        .node-port {
+            position: absolute;
+            width: #{$portSize}px;
+            height: #{$portSize}px;
+            left: 100%;
+            transform: translate(-50%);
+            border: 1px solid #ccc;
+            border-radius: 100px;
+            background: white;
+            &:hover {
+                background: $themeColor;
+                border: 1px solid $themeColor;
+            }
+        }
+        .node-input {
+            top: #{-2 + $portSize/-2}px;
+        }
+        .node-output {
+            bottom: #{-2 + $portSize/-2}px;
+        }
     }
-    .diamond:before {
-        position: absolute;
-        content: '';
-        top: 0px;
-        left: 0px;
-        height: 100%;
-        width: 100%;
-        transform: rotateX(45deg) rotateZ(45deg);
-        box-shadow: 0px 0px 12px gray;
-    }
-    .diamond:after {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        content: '';
-        height: calc(100% - 22px);  /* -22px is 2 * 10px gap on either side - 2px border on either side */
-        width: calc(100% - 22px);  /* -22px is 2 * 10px gap on either side - 2px border on either side */
-        border: 1px solid orange;
-        transform: rotateX(45deg) rotateZ(45deg);
-    }
+    .add-path-btn{
+        position:relative;
+        border-radius:50px;
+        width: 50px;
+        font-size: 20px;
+        padding: 10px;
+        display: block;
+        margin: auto;
 
+    }
+    .flowchart-operator-multipath-title{
+        width: 100%;
+        text-transform: uppercase;
+        padding: 20px 0;
+        font-weight: bold;
+        height: auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: move;
+        text-align: center;
+        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        display: grid;
+        grid-template-columns: 75% 25%;
+        transform:rotate(0deg);
+        -ms-transform:rotate(0deg);
+        -webkit-transform:rotate(0deg);
+    }
+    .selected {
+        border: 3px solid #51eaea;
+    }
 </style>

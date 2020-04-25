@@ -141,7 +141,7 @@ export default {
     },
     addDecisionNode(data){
 
-      let { id , dragX , dragY } = data;
+      let { id , width , height , dragX , dragY } = data;
 
       let scale = this.flowchart_scale;
 
@@ -150,14 +150,18 @@ export default {
         x: dragX - (200 * scale) / scale,
         y: dragY + (100 * scale)  / scale,
         type: "approve",
-        label: "approve"
+        label: "approve",
+        width: width,
+        height:height
       };
       const rejectParam = {
         id:  parseFloat(id + '.' + Math.floor(Math.random() * 1000)),
         x: dragX + (200 * scale) / scale ,
         y: dragY + (100 * scale) / scale,
         label: "reject",
-        type: "reject"
+        type: "reject",
+        width: width,
+        height: height
       };
 
       this.addNode(data);
@@ -170,7 +174,7 @@ export default {
     },
     addMultipathNode(data) {
 
-      let { id, type , dragX , dragY } = data;
+      let { id, pathWidth, pathHeight, type , dragX , dragY } = data;
 
       this.scene.nodes.push({
         label:type,
@@ -183,13 +187,16 @@ export default {
       this.creatingNewPath({
         id:id,
         x:dragX,
-        y:dragY
+        y:dragY,
+        width:pathWidth,
+        height:pathHeight
       });
 
     },
     drop(e) {
-      const type = e.dataTransfer.getData("type");
+      const operator = JSON.parse(e.dataTransfer.getData("operator"));
       const id = parseInt(e.dataTransfer.getData("card_id"));
+
 
       let [dragX, dragY] = this.getMousePosition(
         this.$refs["flowchart_container"],
@@ -200,15 +207,27 @@ export default {
           id:id,
           dragX:dragX / this.flowchart_scale,
           dragY:dragY / this.flowchart_scale,
-          type:type
+          type:operator.type,
+          width:operator.width,
+          height:operator.height,
       };
 
-      if(type === 'decision'){
+      if(operator.type === 'decision'){
+
         this.addDecisionNode(nodeData);
-      } else if(type === 'multipath'){
-        this.addMultipathNode(nodeData);
+
+      } else if(operator.type === 'multipath'){
+
+        this.addMultipathNode({
+            ...nodeData,
+            pathWidth:operator.path.width,
+            pathHeight:operator.path.height
+        });
+
       } else {
+
         this.addNode(nodeData);
+
       }
 
     },
@@ -220,11 +239,11 @@ export default {
     handleTemporaryLink(){
       this.temporaryLinkShow = false;
     },
-    getPortPosition(type, x, y) {
+    getPortPosition(type, x, y , nodeWidth, nodeHeight) {
       if (type === "top") {
-        return [x + 300 / 2, y];
+        return [x + nodeWidth / 2, y ];
       } else if (type === "bottom") {
-        return [x + 300 / 2, y + 45];
+        return [x + nodeWidth / 2, y + nodeHeight];
       }
     },
     linkingStart(index) {
@@ -394,9 +413,10 @@ export default {
 
     creatingNewPath(data){
 
-      let { id , x , y } = data;
+      let { id , width, height, x , y } = data;
 
       let scale = this.flowchart_scale;
+
 
       const randomId = Math.floor(Math.random() * 1000);
 
@@ -405,7 +425,9 @@ export default {
         x: x - ((200) * scale) / scale,
         y: y + ((100) * scale)  / scale,
         type: "path",
-        label: "path"
+        label: "path",
+        width:width,
+        height:height
       };
 
       this.scene.nodes.push(pathParams);
@@ -448,10 +470,23 @@ export default {
         let x, y, cy, cx, ex, ey;
         x = this.scene.centerX + fromNode.x;
         y = this.scene.centerY + fromNode.y;
-        [cx, cy] = this.getPortPosition("bottom", x, y);
+
+        // node height and width from
+        let fromNodeWidth =  parseInt(fromNode.width);
+        let fromNodeHeight = parseInt(fromNode.height);
+
+        [cx, cy] = this.getPortPosition("bottom", x, y , fromNodeWidth , fromNodeHeight);
+
         x = this.scene.centerX + toNode.x;
         y = this.scene.centerY + toNode.y;
-        [ex, ey] = this.getPortPosition("top", x, y);
+
+        // node height and width to
+        let toNodeWidth = parseInt(toNode.width);
+        let toNodeHeight = parseInt(toNode.height);
+
+
+        [ex, ey] = this.getPortPosition("top", x, y , toNodeWidth , toNodeHeight);
+
         return {
           start: [cx, cy],
           end: [ex, ey],
@@ -464,13 +499,19 @@ export default {
       if (this.draggingLink) {
         console.log(this.draggingLink);
         let x, y, cy, cx;
+
         const fromNode = this.findNodeWithID(this.draggingLink.from);
+
         x = this.scene.centerX + fromNode.x;
         y = this.scene.centerY + fromNode.y;
-        [cx, cy] = this.getPortPosition("bottom", x, y);
+
+        let fromNodeWidth =  parseInt(fromNode.width);
+        let fromNodeHeight = parseInt(fromNode.height);
+
+        [cx, cy] = this.getPortPosition("bottom", x, y , fromNodeWidth , fromNodeHeight);
+
         // push temp dragging link, mouse cursor postion = link end postion
         // show temporary link
-
         this.temporaryLinkShow = true;
         this.temporaryLink.start = [cx, cy];
         this.temporaryLink.end = [this.draggingLink.mx, this.draggingLink.my];

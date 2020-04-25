@@ -4,7 +4,7 @@
     <div
       v-for="operator in flowchartOperators"
       :key="operator.type"
-      :id="operator.type"
+      :id="getOperatorObject(operator.id)"
       class="toolbar-operator"
       :draggable="draggable"
       @dragstart="dragStart"
@@ -14,13 +14,7 @@
       <!--<div class="flowchart-inputs"></div>-->
       <div class="toolbar-operator-title-icon">
         <div class="toolbar-operator-icon" :style="{ background:operator.color}">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
-            <path
-              fill="white"
-              stroke="black"
-              d="M4 1c-.55 0-.99.45-.99 1L3 16c0 .55.44 1 1 1h10c.55 0 1-.45 1-1V6l-5-5H4zm6 5V2l4 4h-4z"
-            />
-          </svg>
+
         </div>
       </div>
       <div class="toolbar-operator-title">{{ operator.title }}</div>
@@ -55,54 +49,72 @@ export default {
   data: () => ({
     flowchartOperators: [
       {
+        id:1,
         title: "Start",
         type: "start",
         icon: "",
-        color: "#018383"
+        color: "#018383",
+        width:'300',
+        height:'60'
       },
       {
+        id:2,
         title: "Task",
         type: "task",
-        icon: ""
+        icon: "",
+        width:'300',
+        height:'60'
       },
       {
+        id:3,
         title: "Decision",
         type: "decision",
-        icon: ""
+        icon: "",
+        width:'300',
+        height:'60'
       },
       {
+        id:4,
         title: "End",
         type: "end",
-        icon: ""
+        icon: "",
+        width:'300',
+        height:'60'
       },
       {
+        id:5,
         title: "MultiPath",
         type: "multipath",
-        icon: ""
+        icon: "",
+        width:'120',
+        height:'120',
+        path:{
+            width:'300',
+            height:'60'
+        }
       }
     ]
   }),
   methods: {
     dragStart(e) {
-      console.log("dragStart", e.target);
+      let operator = e.target.id;
+
       const card_id = Math.floor(Math.random() * 1000);
+
       e.dataTransfer.setData("card_id", card_id);
-      e.dataTransfer.setData("type", e.target.id);
+      e.dataTransfer.setData("operator", operator);
     },
     ondragend(e) {
       console.log("dragleave", e);
       e.dataTransfer.setData("clientX", this.options.centerY + e.clientX);
       e.dataTransfer.setData("clientY", this.options.centerY + e.clientY);
+    },
+    getOperatorObject(operator_id){
+        return JSON.stringify(this.flowchartOperators.find(operator => operator.id === operator_id));
     }
   },
   computed: {
-    nodeStyle() {
-      return {
-        top: this.options.centerY + this.y * this.options.scale + "px", // remove: this.options.offsetTop +
-        left: this.options.centerX + this.x * this.options.scale + "px", // remove: this.options.offsetLeft +
-        transform: `scale(${this.options.scale})`
-      };
-    }
+
   }
 };
 </script>
